@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'l10n/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // Views
@@ -24,7 +25,7 @@ Future<bool> useBiometric(BuildContext context, AuthService auth) async {
     return true;
   }
   if (!await auth.canCheckBiometrics) {
-    showDialog(context: context, builder: (context) => Text("No Soportado"));
+    showDialog(context: context, builder: (context) => Text(AppLocalizations.of(context)!.not_supported));
     return false;
   }
   final ok = await auth.authenticate();
@@ -32,7 +33,7 @@ Future<bool> useBiometric(BuildContext context, AuthService auth) async {
     return true;
   } else {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Autenticación fallida')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.failed_authentication)),
     );
     return false;
   }
@@ -62,6 +63,12 @@ class _SplashScreenState extends State<SplashScreen> {
         context,
         MaterialPageRoute(builder: (context) => CURRENT_HOME),
       );
+    } else if (!await hasCounter()) {
+      print("No require counter");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => CURRENT_LOGIN),
+      );
     } else {
       bool maxTries = false;
       while (!maxTries) {
@@ -76,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen> {
       }
       if (maxTries) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Demasiados intentos fallidos')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.too_much_tries_failed)),
         );
         await access_service.AccessService().logout();
         await resetErrorCounter();
@@ -90,12 +97,17 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<bool> checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString('email') == null ? false : true;
+    return prefs.getString("email") == null ? false : true;
   }
 
   Future<int> getErrorCounter() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     return prefs.getInt("error_counter") ?? 0;
+  }
+
+  Future<bool> hasCounter() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.containsKey("error_counter");
   }
 
   Future<void> increaseErrorCounter() async {
@@ -106,7 +118,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> resetErrorCounter() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.remove("error_counter");
+    prefs.setInt("error_counter", 0);
   }
 
   @override

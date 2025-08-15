@@ -469,6 +469,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Created Correctly'**
   String get created_correctly;
+
+  /// No description provided for @not_supported.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Supported'**
+  String get not_supported;
+
+  /// No description provided for @failed_authentication.
+  ///
+  /// In en, this message translates to:
+  /// **'Authentication Failed'**
+  String get failed_authentication;
+
+  /// No description provided for @too_much_tries_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Too Much Tries Failed'**
+  String get too_much_tries_failed;
 }
 
 class _AppLocalizationsDelegate

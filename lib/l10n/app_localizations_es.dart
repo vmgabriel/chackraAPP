@@ -215,4 +215,13 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get created_correctly => 'Creado Correctamente';
+
+  @override
+  String get not_supported => 'No Soportado';
+
+  @override
+  String get failed_authentication => 'Autenticacion Fallida';
+
+  @override
+  String get too_much_tries_failed => 'Demasiados Intentos Fallidos';
 }

@@ -22,4 +22,5 @@ The Base minimum with the rules that we can generate context over other kinds of
 - [ ] Organize Code
 - [ ] Add ChangeLog
 - [X] Fix Getting data Complete in Board
+- [ ] Add Internationalization for Messages in Splash Screen
 - [ ] Fix Updated Authorization Message if not is required biometry

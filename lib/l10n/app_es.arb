@@ -75,5 +75,8 @@
   "server_connection": "Error en la Conexion con el Servidor",
   "username_already_exists": "Username Ya Existe",
   "email_already_exists": "Email Ya Existe",
-  "created_correctly": "Creado Correctamente"
+  "created_correctly": "Creado Correctamente",
+  "not_supported": "No Soportado",
+  "failed_authentication": "Autenticacion Fallida",
+  "too_much_tries_failed": "Demasiados Intentos Fallidos"
 }
