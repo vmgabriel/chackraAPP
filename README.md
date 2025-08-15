@@ -24,3 +24,8 @@ The Base minimum with the rules that we can generate context over other kinds of
 - [X] Fix Getting data Complete in Board
 - [X] Add Internationalization for Messages in Splash Screen
 - [X] Fix Updated Authorization Message if not is required biometry
+- [X] Add Entity Domain Task
+- [X] Add Migration Table for Task
+- [X] Add Repository Task
+- [ ] Add AdapterServer for Task
+- [ ] Add Sync for Task

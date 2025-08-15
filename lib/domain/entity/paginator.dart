@@ -38,5 +38,4 @@ class Paginator<T> {
   PaginatorRequest getRequestForNextPaginator() {
     return PaginatorRequest(filters: request.filters, orderBy: request.orderBy, page: request.page + 1);
   }
-
 }

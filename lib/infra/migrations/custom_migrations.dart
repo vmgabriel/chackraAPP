@@ -82,3 +82,27 @@ final createTableOfBoard = migration_port.Migrator(
   execute: createTableOfBoardExecute,
   rollback: createTableOfBoardRollback,
 );
+
+final String createTableOfTaskExecute = """
+CREATE TABLE IF NOT EXISTS tbl_task (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT NOT NULL,
+  priority TEXT NOT NULL,
+  status TEXT NOT NULL,
+  board_id TEXT NOT NULL,
+  owner TEXT NOT NULL,
+  icon_url TEXT NULL,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  FOREIGN KEY (board_id) REFERENCES tbl_board(id)
+);
+""";
+final String createTableOfTaskRollback = """
+DROP TABLE IF EXISTS tbl_task;
+""";
+final createTableOfTask = migration_port.Migrator(
+  priority: 5,
+  name: "create_table_task",
+  execute: createTableOfTaskExecute,
+  rollback: createTableOfTaskRollback,
+);

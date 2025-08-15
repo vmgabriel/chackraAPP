@@ -80,6 +80,7 @@ MigrationHandlerSqlite build(abstract_uow.AbstractUOW uow) {
         custom_migrations.createTableOfAccess,
         custom_migrations.createTableOfSync,
         custom_migrations.createTableOfBoard,
+        custom_migrations.createTableOfTask,
       ],
       uow: uow
   );
