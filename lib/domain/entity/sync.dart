@@ -122,7 +122,8 @@ class SyncHandler {
       lastFetch = await sync.fetchServer(lastFetch);
       for (var element in lastFetch.elements) {
         var syncing = sync.getSyncing(element);
-        if (!await syncing.requireSync()) {
+        var requireSync =await syncing.requireSync();
+        if (!requireSync) {
           print("Sync already done");
           continue;
         }

@@ -44,8 +44,6 @@ class BoardSync extends entity_sync.Sync<entity_board.Board> {
     var serverConnector = serverAdapter as port_server_board.BoardApiHttp;
     try {
       var currentPaginator = await serverConnector.get(pager);
-      print("currentPaginator $currentPaginator");
-      print(currentPaginator!.elements);
       return entity_sync.FetchStatus<Board>(
         requireFetch: (currentPaginator != null) ? currentPaginator.hasNext : false,
         elements: (currentPaginator != null) ? currentPaginator.elements as List<Board> : [],

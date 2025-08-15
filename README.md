@@ -17,7 +17,9 @@ The Base minimum with the rules that we can generate context over other kinds of
 - [X] Create A Login
 - [X] Create TODO Style to Trello APP
 - [X] Connect the Current Login
-- [ ] Add Git
-- [ ] Upload to Github
+- [X] Add Git
+- [X] Upload to Github
 - [ ] Organize Code
 - [ ] Add ChangeLog
+- [X] Fix Getting data Complete in Board
+- [ ] Fix Updated Authorization Message if not is required biometry

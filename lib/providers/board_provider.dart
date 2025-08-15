@@ -16,15 +16,12 @@ final boardListProvider = FutureProvider.family<
     entity_paginator.Paginator<entity_board.Board>,
     entity_paginator.PaginatorRequest?
 > ((ref, paginatorRequest) async {
-  print('🔍 Llamando boardListProvider con: $paginatorRequest'); // 👈
   final builder = infra_builder.InfraBuilder.build();
   final service = services_board.BoardService(infraBuilder: builder);
   try {
     var data = await service.get(paginatorRequest);
-    print('✅ Éxito: ${data.elements.length} boards'); // 👈
     return data;
   } catch (e) {
-    print('❌ Error: $e'); // 👈
     rethrow;
   }
 });

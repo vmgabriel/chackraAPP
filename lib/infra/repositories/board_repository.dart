@@ -32,7 +32,7 @@ class SqliteBoardRepository extends board_repository_domain.BoardRepository {
     List<entity_board.Board> context = await uow.atomicGet<entity_board.Board>(
       selectByNameQuery,
       entity_board.Board.fromRow,
-      [name, page.toString()],
+      [name, (page - 1).toString()],
     );
     return entity_paginator.Paginator(
         request: paginatorRequest ?? entity_paginator.PaginatorRequest(
