@@ -27,5 +27,5 @@ The Base minimum with the rules that we can generate context over other kinds of
 - [X] Add Entity Domain Task
 - [X] Add Migration Table for Task
 - [X] Add Repository Task
-- [ ] Add AdapterServer for Task
+- [X] Add AdapterServer for Task
 - [ ] Add Sync for Task
