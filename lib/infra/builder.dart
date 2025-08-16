@@ -6,6 +6,7 @@ import 'package:argos_home/infra/migrations/migrations.dart' as migrations_infra
 import 'package:argos_home/infra/server/login_adapter.dart' as login_infra;
 import 'package:argos_home/infra/server/profile_adapter.dart' as profile_infra;
 import 'package:argos_home/infra/server/board_adapter.dart' as board_infra;
+import 'package:argos_home/infra/server/task_adapter.dart' as task_infra;
 
 // Ports
 import 'package:argos_home/domain/port/uow/commons.dart' as uow_commons_port;
@@ -22,10 +23,12 @@ import 'package:argos_home/infra/repositories/access_repository.dart' as infra_a
 import 'package:argos_home/infra/repositories/profile_repository.dart' as infra_profile_repository;
 import 'package:argos_home/infra/repositories/sync_repository.dart' as infra_sync_repository;
 import 'package:argos_home/infra/repositories/board_repository.dart' as infra_board_repository;
+import 'package:argos_home/infra/repositories/task_repository.dart' as infra_task_repository;
 
 // Infra Syncs
 import 'package:argos_home/infra/sync/profile.dart' as infra_sync_profile;
 import 'package:argos_home/infra/sync/board.dart' as infra_sync_board;
+import 'package:argos_home/infra/sync/task.dart' as infra_sync_task;
 
 
 class InfraBuilder {
@@ -52,6 +55,7 @@ class InfraBuilder {
       "profile": profile_infra.ProfileAdapterApiServer(),
       "user": profile_infra.UserAdapterApiServer(),
       "board": board_infra.BoardAdapterApiService(),
+      "task": task_infra.TaskAdapterApiService(),
     };
 
     var syncRepository = infra_sync_repository.SqliteSyncRepository(uow: uow);
@@ -60,6 +64,7 @@ class InfraBuilder {
       "profile": infra_profile_repository.SqliteProfileRepository(uow: uow),
       "sync": syncRepository,
       "board": infra_board_repository.SqliteBoardRepository(uow: uow),
+      "task": infra_task_repository.SqliteTaskRepository(uow: uow),
     };
 
     var syncHandler = entity_sync.SyncHandler(
@@ -73,7 +78,12 @@ class InfraBuilder {
             serverAdapter: servers["board"]!,
             persistenceAdapter: repositories["board"]!,
             syncRepository: syncRepository,
-          )
+          ),
+          infra_sync_task.TaskSync(
+            serverAdapter: servers["task"]!,
+            persistenceAdapter: repositories["task"]!,
+            syncRepository: syncRepository,
+          ),
         ]
     );
 
