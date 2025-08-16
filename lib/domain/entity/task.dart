@@ -22,6 +22,7 @@ class Task {
   TaskStatus status;
   String? iconUrl;
   Map<String, String> owner;
+  DateTime? updatedAt;
 
   Task({
     required this.id,
@@ -31,6 +32,7 @@ class Task {
     required this.priority,
     required this.status,
     required this.owner,
+    required this.updatedAt,
     this.iconUrl,
   });
 
@@ -42,6 +44,7 @@ class Task {
       description: json["description"],
       priority: PriorityType.values.firstWhere((element) => element.name == json["priority"]),
       status: TaskStatus.values.firstWhere((element) => element.name == json["status"]),
+      updatedAt: json.containsKey("updated_at") ? DateTime.parse(json["updated_at"]) : DateTime.now(),
       owner: json["owner"],
       iconUrl: json["icon_url"] ?? "",
     );
@@ -55,6 +58,7 @@ class Task {
       description: row["description"],
       priority: PriorityType.values.firstWhere((element) => element.name == row["priority"]),
       status: TaskStatus.values.firstWhere((element) => element.name == row["status"]),
+      updatedAt: row.containsKey("updated_at") ? DateTime.parse(row["updated_at"]) : DateTime.now(),
       owner: row["owner"],
       iconUrl: row["icon_url"] ?? "",
     );

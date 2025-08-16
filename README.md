@@ -28,4 +28,7 @@ The Base minimum with the rules that we can generate context over other kinds of
 - [X] Add Migration Table for Task
 - [X] Add Repository Task
 - [X] Add AdapterServer for Task
-- [ ] Add Sync for Task
+- [X] Add Sync for Task
+- [ ] Add Service for Task
+- [ ] Add Controller for Task
+- [ ] Integrate Controller Task in Infra
