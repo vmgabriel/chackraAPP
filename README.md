@@ -29,6 +29,6 @@ The Base minimum with the rules that we can generate context over other kinds of
 - [X] Add Repository Task
 - [X] Add AdapterServer for Task
 - [X] Add Sync for Task
-- [ ] Add Service for Task
+- [X] Add Service for Task
 - [ ] Add Controller for Task
 - [ ] Integrate Controller Task in Infra
