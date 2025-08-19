@@ -88,13 +88,13 @@ class BoardListView extends ConsumerWidget {
                   ),
                   itemCount: paginator.total,
                   itemBuilder: (context, index) {
-                    final board = paginator.elements[index];
+                    final entity_board.Board board = paginator.elements[index];
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => const board_view.BoardScreen(),
+                            builder: (_) => board_view.BoardView(boardId: board.id),
                           ),
                         );
                       },

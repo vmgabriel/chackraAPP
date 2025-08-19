@@ -25,11 +25,13 @@ class TaskService {
       await infraBuilder.executeSync("task");
       print("Executed sync");
     }
-    var boardRepository = infraBuilder.getRepository<repository_task.TaskRepository>("Task");
+
+    var taskRepository = infraBuilder.getRepository<repository_task.TaskRepository>("task");
 
     try {
-      return await boardRepository.get(request);
+      return await taskRepository.get(request);
     } on exception_port.NotValidErrorClient {
+      print("NotValidErrorClient");
       return entity_paginator.Paginator<entity_task.Task>(
           elements: [],
           page: 1,
@@ -38,6 +40,7 @@ class TaskService {
           request: entity_paginator.PaginatorRequest()
       );
     } on exception_port.InternalServerErrorClient {
+      print("InternalServerErrorClient");
       return entity_paginator.Paginator<entity_task.Task>(
           elements: [],
           page: 1,
@@ -46,6 +49,7 @@ class TaskService {
           request: entity_paginator.PaginatorRequest()
       );
     } on exception_port.NotAuthenticatedErrorClient {
+      print("NotAuthenticatedErrorClient");
       return entity_paginator.Paginator<entity_task.Task>(
           elements: [],
           page: 1,
@@ -54,6 +58,7 @@ class TaskService {
           request: entity_paginator.PaginatorRequest()
       );
     } on exception_port.NotAuthorizedErrorClient {
+      print("NotAuthorizedErrorClient");
       return entity_paginator.Paginator<entity_task.Task>(
           elements: [],
           page: 1,

@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS tbl_task (
   board_id TEXT NOT NULL,
   owner TEXT NOT NULL,
   icon_url TEXT NULL,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (board_id) REFERENCES tbl_board(id)
 );
 """;

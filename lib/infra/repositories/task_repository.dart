@@ -57,21 +57,22 @@ class SqliteTaskRepository extends domain_repository_task.TaskRepository {
   Future<entity_paginator.Paginator<entity_task.Task>> get(
       entity_paginator.PaginatorRequest? paginatorRequest
   ) async {
-    const limitPage = 20;
+    const limitPage = 100;
     var page = paginatorRequest?.page ?? 1;
-    var board_id = paginatorRequest?.filters["board_id"] ?? "";
+    var boardId = paginatorRequest?.filters["board_id"] ?? "";
+
     const String selectCountByBoardIdQuery = "SELECT COUNT(*) FROM tbl_task WHERE board_id = ?";
     const String selectByBoardIdQuery = "SELECT * FROM tbl_task WHERE board_id = ? LIMIT $limitPage OFFSET ?";
     List<repository_commons.CountResponse> countContext = await uow.atomicGet<repository_commons.CountResponse>(
       selectCountByBoardIdQuery,
       (Map<String, dynamic> row) => repository_commons.CountResponse(count: row["COUNT(*)"] ?? 0),
-      [board_id],
+      [boardId],
     );
     repository_commons.CountResponse total = countContext.first;
     List<entity_task.Task> context = await uow.atomicGet<entity_task.Task>(
       selectByBoardIdQuery,
       entity_task.Task.fromRow,
-      [board_id, (page - 1).toString()],
+      [boardId, (page - 1).toString()],
     );
 
     return entity_paginator.Paginator(

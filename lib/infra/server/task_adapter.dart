@@ -20,7 +20,7 @@ class TasksGetRequestObject  extends domain_server_request.RequestServer {
   Map<String, dynamic> toJson() {
     var orderByData = orderBy ?? [];
     var data = {
-      "offset": page.toString(),
+      "offset": (page - 1).toString(),
       "trace_id": traceId,
     };
     if (orderBy != null) {
@@ -41,17 +41,9 @@ class TaskAdapterApiService extends port_server_task.TaskApiHttp {
       taskRequest.page = request.page;
     }
 
-    String? boardId = "";
-    if (request != null && request.filters.containsKey("board_id")) {
-      boardId = request.filters["board_id"];
-    }
-    if (boardId!.isEmpty) {
-      return null;
-    }
-
     var response = await server_common.sendServerRequest(
         method: "GET",
-        uri: "v1/boards/$boardId/tasks",
+        uri: "v1/tasks",
         request: taskRequest,
         withAuthorization: true
     );

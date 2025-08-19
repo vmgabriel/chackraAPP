@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 enum PriorityType {
   LOW,
   MEDIUM,
@@ -42,10 +44,10 @@ class Task {
       name: json["name"],
       boardId: json["board_id"],
       description: json["description"],
-      priority: PriorityType.values.firstWhere((element) => element.name == json["priority"]),
-      status: TaskStatus.values.firstWhere((element) => element.name == json["status"]),
+      priority: PriorityType.values.firstWhere((element) => element.name.toLowerCase() == json["priority"].toLowerCase()),
+      status: TaskStatus.values.firstWhere((element) => element.name.toLowerCase() == json["status"].toLowerCase()),
       updatedAt: json.containsKey("updated_at") ? DateTime.parse(json["updated_at"]) : DateTime.now(),
-      owner: json["owner"],
+      owner: json.containsKey("owner_data") ? (json["owner_data"] as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString())) : {},
       iconUrl: json["icon_url"] ?? "",
     );
   }
@@ -56,10 +58,10 @@ class Task {
       name: row["name"],
       boardId: row["board_id"],
       description: row["description"],
-      priority: PriorityType.values.firstWhere((element) => element.name == row["priority"]),
-      status: TaskStatus.values.firstWhere((element) => element.name == row["status"]),
+      priority: PriorityType.values.firstWhere((element) => element.name.toLowerCase() == row["priority"].toLowerCase()),
+      status: TaskStatus.values.firstWhere((element) => element.name.toLowerCase() == row["status"].toLowerCase()),
       updatedAt: row.containsKey("updated_at") ? DateTime.parse(row["updated_at"]) : DateTime.now(),
-      owner: row["owner"],
+      owner: row.containsKey("owner") ? (json.decode(row["owner"]) as Map<String, dynamic>).map((key, value) => MapEntry(key, value.toString())) : {},
       iconUrl: row["icon_url"] ?? "",
     );
   }

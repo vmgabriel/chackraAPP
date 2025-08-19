@@ -32,4 +32,6 @@ The Base minimum with the rules that we can generate context over other kinds of
 - [X] Add Service for Task
 - [X] Add Controller for Task
 - [X] Integrate Controller Task in Infra
-- [ ] Integrate Controller Task in View
+- [X] Integrate Controller Task in View
+- [X] Integrate View And Show data in Provider - Tasks in columns TODO - Doing - Done
+- [ ] Change in Pagination Filter and Order as String, immutable problem

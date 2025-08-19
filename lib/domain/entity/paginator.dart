@@ -1,5 +1,7 @@
-import 'package:flutter/foundation.dart' show mapEquals;
+import 'package:flutter/foundation.dart' show mapEquals, immutable;
 
+
+@immutable
 class PaginatorRequest {
   final Map<String, String> filters;
   final Map<String, String> orderBy;

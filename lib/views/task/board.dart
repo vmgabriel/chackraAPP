@@ -1,242 +1,234 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 
 // Utils
 import 'package:argos_home/styles.dart' as styles;
 import 'package:argos_home/views/utils/app_bar.dart' as appbar;
 
+// Entity
+import 'package:argos_home/domain/entity/paginator.dart' as entity_paginator;
+import 'package:argos_home/domain/entity/task.dart' as entity_task;
 
-class Tarjeta {
-  String titulo;
-  String prioridad;
-  Tarjeta(this.titulo, this.prioridad);
-}
+// Providers
+import 'package:argos_home/providers/task_provider.dart' as provider_task;
 
-class BoardScreen extends StatefulWidget {
-  const BoardScreen({super.key});
 
-  @override
-  State<BoardScreen> createState() => _BoardScreenState();
-}
+class BoardView extends HookConsumerWidget {
+  final String boardId;
 
-class _BoardScreenState extends State<BoardScreen> {
-  List<List<Tarjeta>> lists = [
-    [Tarjeta('Tarea A', 'CRITICA'), Tarjeta('Tarea B', 'MEDIA')],
-    [Tarjeta('Tarea C', 'BAJA')],
-    [Tarjeta('Tarea D', 'ALTA')],
-    [Tarjeta('Tarea E', 'MEDIA'), Tarjeta('Tarea F', 'BAJA')]
-  ];
+  const BoardView({required this.boardId, super.key});
 
-  Color? getColorByPriority(String prioridad) {
-    switch (prioridad) {
-      case 'CRITICA':
+  Color? getColorByPriority(entity_task.PriorityType priority) {
+    switch (priority) {
+      case entity_task.PriorityType.CRITICAL:
         return Colors.red[800];
-      case 'ALTA':
+      case entity_task.PriorityType.HIGH:
         return Colors.red[300];
-      case 'MEDIA':
+      case entity_task.PriorityType.MEDIUM:
         return Colors.amber[400];
-      case 'BAJA':
+      case entity_task.PriorityType.LOW:
         return Colors.grey[400];
-      default:
-        return Colors.grey;
-    }
+      }
   }
 
   void _showEditDialog(int listIndex, int cardIndex) {
-    final tarjeta = lists[listIndex][cardIndex];
-    final TextEditingController controller =
-    TextEditingController(text: tarjeta.titulo);
-    String selectedPriority = tarjeta.prioridad;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Editar tarjeta'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: controller,
-              decoration:
-              const InputDecoration(hintText: 'Título de la tarjeta'),
-            ),
-            const SizedBox(height: 12),
-            DropdownButton<String>(
-              value: selectedPriority,
-              isExpanded: true,
-              onChanged: (value) {
-                if (value != null) {
-                  setState(() => selectedPriority = value);
-                }
-              },
-              items: const [
-                DropdownMenuItem(value: 'CRITICA', child: Text('CRÍTICA')),
-                DropdownMenuItem(value: 'ALTA', child: Text('ALTA')),
-                DropdownMenuItem(value: 'MEDIA', child: Text('MEDIA')),
-                DropdownMenuItem(value: 'BAJA', child: Text('BAJA')),
-              ],
-            )
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              setState(() {
-                lists[listIndex].removeAt(cardIndex);
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                lists[listIndex][cardIndex] =
-                    Tarjeta(controller.text.trim(), selectedPriority);
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Guardar'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    Map<entity_task.TaskStatus, List<entity_task.Task>> listData = {
+      entity_task.TaskStatus.TODO: [],
+      entity_task.TaskStatus.DOING: [],
+      entity_task.TaskStatus.DONE: []
+    };
+    Map<int, entity_task.TaskStatus> listDataIndex = {
+      0: entity_task.TaskStatus.TODO,
+      1: entity_task.TaskStatus.DOING,
+      2: entity_task.TaskStatus.DONE
+    };
+    final request = useMemoized(() {
+      return entity_paginator.PaginatorRequest(
+        page: 1,
+        filters: {'board_id': boardId},
+      );
+    }, [boardId]);
+
+    print("request hashcode ${request.hashCode}");
+
+    final taskListAsync = ref.watch(
+        provider_task.taskListProvider(request)
+    );
+
     return Scaffold(
       appBar: appbar.CustomAppBar(
-          title: "Tus Tableros",
+        title: "Tus Tableros",
       ),
-      body: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: List.generate(lists.length, (listIndex) {
-            return DragTarget<Map<String, dynamic>>(
-              onWillAccept: (_) => true,
-              onAccept: (data) {
-                final tarjeta = data['tarjeta'] as Tarjeta;
-                final fromList = data['fromList'] as int;
-                final index = data['index'] as int;
+      body: taskListAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, color: Colors.red),
+                const SizedBox(height: 8),
+                Text('Error: $err'),
+                TextButton(
+                  onPressed: () => ref.invalidate(provider_task.taskListProvider(request)),
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
+          data: (entity_paginator.Paginator<entity_task.Task> paginator) {
+            if (paginator.total == 0 || paginator.elements.length == 0) {
+              return Center(child: Text("Task Not Found"));
+            }
+            for (entity_task.Task task in paginator.elements) {
+              if (task.status == entity_task.TaskStatus.TODO) {
+                listData[task.status]!.add(task);
+              }
+              if (task.status == entity_task.TaskStatus.DOING) {
+                listData[task.status]!.add(task);
+              }
+              if (task.status == entity_task.TaskStatus.DONE) {
+                listData[task.status]!.add(task);
+              }
+            }
 
-                setState(() {
-                  lists[fromList].removeAt(index);
-                  lists[listIndex].add(tarjeta);
-                });
-              },
-              builder: (context, candidateData, rejectedData) {
-                return Container(
-                  width: 280,
-                  margin: const EdgeInsets.only(right: 16),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 5,
-                        offset: const Offset(0, 2),
-                      )
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Lista ${listIndex + 1}',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      const SizedBox(height: 12),
-                      ...List.generate(lists[listIndex].length, (cardIndex) {
-                        final tarjeta = lists[listIndex][cardIndex];
-                        return LongPressDraggable<Map<String, dynamic>>(
-                          data: {
-                            'fromList': listIndex,
-                            'index': cardIndex,
-                            'tarjeta': tarjeta
-                          },
-                          feedback: Material(
-                            elevation: 6,
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              width: 260,
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(8),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                  ),
-                                ],
+            return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: List.generate(listData.keys.length, (listIndex) {
+                  return DragTarget<Map<String, dynamic>>(
+                    onWillAccept: (_) => true,
+                    onAccept: (data) {
+                      final task = data['task'] as entity_task.Task;
+                      final fromList = data['fromList'] as int;
+                      final index = data['index'] as int;
+
+                      // setState(() {
+                      //   listData[listDataIndex[fromList]]!.removeAt(index);
+                      //   listData[listDataIndex[listIndex]]!.add(task);
+                      // });
+                    },
+                    builder: (context, candidateData, rejectedData) {
+                      return Container(
+                        width: 280,
+                        margin: const EdgeInsets.only(right: 16),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 5,
+                              offset: const Offset(0, 2),
+                            )
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              listDataIndex[listIndex]!.name,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16
                               ),
-                              child: Text(tarjeta.titulo),
                             ),
-                          ),
-                          childWhenDragging: const SizedBox.shrink(),
-                          child: GestureDetector(
-                            onTap: () => _showEditDialog(listIndex, cardIndex),
-                            child: Card(
-                              elevation: 2,
-                              margin: const EdgeInsets.only(bottom: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(tarjeta.titulo),
-                                    const SizedBox(height: 6),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: getColorByPriority(
-                                            tarjeta.prioridad),
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: Text(
-                                        tarjeta.prioridad,
-                                        style: const TextStyle(
-                                            color: Colors.white, fontSize: 12),
+                            const SizedBox(height: 12),
+                            ...List.generate(listData[listDataIndex[listIndex]]!.length, (taskIndex) {
+                              final task = listData[listDataIndex[listIndex]]![taskIndex];
+                              return LongPressDraggable<Map<String, dynamic>>(
+                                data: {
+                                  'fromList': listIndex,
+                                  'index': taskIndex,
+                                  'task': task
+                                },
+                                feedback: Material(
+                                  elevation: 6,
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    width: 260,
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.1),
+                                          blurRadius: 4,
+                                        ),
+                                      ],
+                                    ),
+                                    child: Text(task.name),
+                                  ),
+                                ),
+                                childWhenDragging: const SizedBox.shrink(),
+                                child: GestureDetector(
+                                  onTap: () => _showEditDialog(listIndex, taskIndex),
+                                  child: Card(
+                                    elevation: 2,
+                                    margin: const EdgeInsets.only(bottom: 10),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(task.name),
+                                          const SizedBox(height: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                                vertical: 4
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: getColorByPriority(task.priority),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              task.priority.name,
+                                              style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              ),
+                                  )
+                                )
+                              );
+                            }),
+                            TextButton.icon(
+                              onPressed: () {
+                                // setState(() {
+                                //   lists[listIndex].add(Tarjeta('Nueva tarjeta', 'MEDIA'));
+                                // });
+                              },
+                              icon: const Icon(Icons.add, size: 18),
+                              label: const Text('Añadir tarjeta'),
                             ),
-                          ),
-                        );
-                      }),
-                      TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            lists[listIndex]
-                                .add(Tarjeta('Nueva tarjeta', 'MEDIA'));
-                          });
-                        },
-                        icon: const Icon(Icons.add, size: 18),
-                        label: const Text('Añadir tarjeta'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            );
-          }),
+                          ]
+                        )
+                      );
+                    }
+                  );
+                }),
+
+            ));
+          }
         ),
-      ),
     );
   }
 }
